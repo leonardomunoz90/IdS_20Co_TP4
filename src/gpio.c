@@ -22,25 +22,28 @@ SPDX-License-Identifier: MIT
 *************************************************************************************************/
 
 /** @file
- ** @brief Definición de la función principal del programa
+ ** @brief  Implementación de capa abstraccion de GPIO.
  **/
 
 /* === Headers files inclusions =============================================================== */
 
-#include "main.h"
 #include "gpio.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 /* === Macros definitions ====================================================================== */
-
-#define RED_LED_PORT 1
-#define RED_LED_PIN  2
-
-#define BUTTON_PORT  2
-#define BUTTON_PIN   4
 
 /* === Private data type declarations ========================================================== */
 
 /* === Private variable declarations =========================================================== */
+
+//! Estructura con los atributos de un puerto digital
+struct gpio_h {
+    uint8_t port; //!< Número de puerto del gpio
+    uint8_t pin;  //!< Número del pin del gpio
+    bool state;   //!< Estado actual del puerto
+    bool output;  //!< Indica si el pin es salida
+};
 
 /* === Private function declarations =========================================================== */
 
@@ -52,23 +55,30 @@ SPDX-License-Identifier: MIT
 
 /* === Public function implementation ========================================================== */
 
-int main(void) {
-
-    gpio_t led_rojo;
-    gpio_t button;
-
-    led_rojo = Gpio_create(RED_LED_PORT, RED_LED_PIN);
-    Gpio_set_direction(led_rojo, OUTPUT);
-    Gpio_set_state(led_rojo, HIGH);
-
-    button = Gpio_create(BUTTON_PORT, BUTTON_PIN);
-    Gpio_set_direction(button, INPUT);
-
-    while (1) {
-        /*User loop code*/
+gpio_t Gpio_create(uint8_t port, uint8_t bit) {
+    gpio_t self = malloc(sizeof(struct gpio_h));
+    if (self) {
+        self->port = port;
+        self->pin = bit;
     }
+    return self;
+}
 
-    return 0;
+void Gpio_set_direction(gpio_t self, bool output) {
+    self->output = output;
+}
+
+bool Gpio_get_direction(gpio_t self) {
+    return self->output;
+}
+
+void Gpio_set_state(gpio_t self, bool state) {
+    if (self->output)
+        self->state = state;
+}
+
+bool Gpio_get_state(gpio_t self) {
+    return self->state;
 }
 
 /* === End of documentation ==================================================================== */
